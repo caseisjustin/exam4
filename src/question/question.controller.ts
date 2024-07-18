@@ -6,12 +6,12 @@ import { Roles } from 'src/auth2/roles.decorator';
 import { RolesGuard } from 'src/auth2/roles.guard';
 
 @Controller('questions')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
   @Post()
-  @Roles(['admin', 'moderator'])
+  // @Roles(['admin', 'moderator'])
   async create(@Body() createQuestionDto: CreateQuestionDto) {
     return this.questionService.create(createQuestionDto);
   }

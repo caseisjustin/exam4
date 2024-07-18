@@ -1,35 +1,54 @@
+// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { User } from '../user/user.model';
+import { InjectModel } from '@nestjs/sequelize';
+// import { User } from './user.model';
+import { OtpService } from './otp.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { User } from 'src/user/user.model';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
+    @InjectModel(User)
+    private userModel: typeof User,
+    private jwtService: JwtService,
+    private otpService: OtpService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userService.findByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user;
-      return result;
+  async register(email: string, username: string, password: string) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, username, password: hashedPassword, role: 'user', status: 'inactive' });
+    await user.save();
+    await this.otpService.generateOtp(user);
+    return user;
+  }
+
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userModel.findOne({ where: { email } });
+    if (user && await bcrypt.compare(password, user.password)) {
+      return user;
     }
-    return null;
+    throw new UnauthorizedException();
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.id, role: user.role };
+    const payload = { username: user.username, sub: user.id };
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: '10m' }),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      access_token: this.jwtService.sign(payload),
     };
   }
 
-  async register(user: CreateUserDto) {
-    return this.userService.create(user);
+  async verifyPayload(payload: any): Promise<User> {
+    return this.userModel.findByPk(payload.sub);
+  }
+
+  async activateAccount(id: UUID): Promise<string> {
+    const user = await this.userModel.findOne({where: {id}})
+    user.status = "active"
+    user.otp = ''
+    user.save()
+    return "Account activated"
   }
 }

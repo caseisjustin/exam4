@@ -13,7 +13,7 @@ import { Question } from './question/question.model';
 import { Response } from './response/response.model';
 import { Result } from './result/result.model';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { Auth2Module } from './auth2/auth2.module';
+// import { Auth2Module } from './auth2/auth2.module';
 
 @Module({
   imports: [
@@ -48,7 +48,6 @@ import { Auth2Module } from './auth2/auth2.module';
     QuestionModule,
     ResponseModule,
     ResultModule,
-    Auth2Module,
   ],
   
 })

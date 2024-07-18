@@ -1,23 +1,25 @@
+// src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { UserModule } from '../user/user.module';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
-import { RolesGuard } from './roles.guard';
 import { AuthController } from './auth.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { User } from 'src/user/user.model';
 import { OtpService } from './otp.service';
 
 @Module({
   imports: [
-    UserModule,
-    MailerModule,
+    SequelizeModule.forFeature([User]),
+    ConfigModule,
     JwtModule.register({
-      secret: "sdhfuioew",
-      signOptions: { expiresIn: "10m" },
-      global: true,
+      secret: "fiwhe#&$",
+      signOptions: { expiresIn: '60m' },
     }),
+    MailerModule,
   ],
+  providers: [AuthService, OtpService],
   controllers: [AuthController],
-  providers: [AuthService, RolesGuard, JwtService, OtpService],
 })
 export class AuthModule {}

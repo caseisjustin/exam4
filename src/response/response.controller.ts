@@ -5,12 +5,12 @@ import { Roles } from 'src/auth2/roles.decorator';
 import { RolesGuard } from 'src/auth2/roles.guard';
 
 @Controller('responses')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 export class ResponseController {
   constructor(private readonly responseService: ResponseService) {}
 
   @Post()
-  @Roles(['user'])
+  // @Roles(['user'])
   async create(@Body() createResponseDto: CreateResponseDto) {
     return this.responseService.create(createResponseDto);
   }
@@ -27,7 +27,7 @@ export class ResponseController {
   }
 
   @Delete(':id')
-  @Roles(['admin', 'moderator'])
+  // @Roles(['admin', 'moderator'])
   async remove(@Param('id') id: string) {
     return this.responseService.remove(id);
   }

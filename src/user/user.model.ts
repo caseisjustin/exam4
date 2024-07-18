@@ -1,3 +1,4 @@
+import { UUID } from 'crypto';
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table
@@ -7,7 +8,7 @@ export class User extends Model<User> {
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  id: string;
+  id: UUID;
 
   @Column({
     type: DataType.STRING,
@@ -41,6 +42,9 @@ export class User extends Model<User> {
     allowNull: false,
   })
   status: 'active' | 'inactive';
+
+  @Column
+  otp: string
 
   @Column({
     type: DataType.DATE,

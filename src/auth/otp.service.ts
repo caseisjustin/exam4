@@ -1,40 +1,37 @@
+// src/auth/otp.service.ts
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { v4 as uuidv4 } from 'uuid';
+// import { User } from './user.model';
+import { InjectModel } from '@nestjs/sequelize';
+import * as crypto from 'crypto';
+import { User } from 'src/user/user.model';
 
 @Injectable()
 export class OtpService {
-  private otpMap = new Map<string, string>(); // Map to store userId and OTP
+  constructor(
+    @InjectModel(User)
+    private userModel: typeof User,
+    private readonly mailerService: MailerService,
+  ) {}
 
-  constructor(private readonly mailerService: MailerService) {}
-
-  generateOTP(): string {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  async generateOtp(user: User): Promise<string> {
+    const otp = crypto.randomBytes(3).toString('hex');
+    user.otp = otp;
+    await user.save();
+    await this.sendOtpEmail(user.email, otp);
     return otp;
   }
 
-  storeOTP(userId: string, otp: string): void {
-    this.otpMap.set(userId, otp);
-  }
-
-  getOTP(userId: string): string | undefined {
-    return this.otpMap.get(userId);
-  }
-
-  clearOTP(userId: string): void {
-    this.otpMap.delete(userId);
-  }
-
-  async sendOTPByEmail(email: string, userId: uuidv4): Promise<void> {
-    const otp = this.generateOTP();
-
-    this.storeOTP(userId, otp);
-
+  async sendOtpEmail(email: string, otp: string): Promise<void> {
     await this.mailerService.sendMail({
       to: email,
-      subject: 'OTP Verification',
-      template: 'otp',
+      subject: 'Your OTP Code',
+      template: './otp',
       text: `${otp}`
     });
+  }
+
+  async verifyOtp(user: User, otp: string): Promise<boolean> {
+    return user.otp === otp;
   }
 }

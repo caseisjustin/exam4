@@ -6,12 +6,12 @@ import { RolesGuard } from 'src/auth2/roles.guard';
 import { Roles } from 'src/auth2/roles.decorator';
 
 @Controller('surveys')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 export class SurveyController {
   constructor(private readonly surveyService: SurveyService) {}
 
   @Post()
-  @Roles(['admin', 'moderator'])
+  // @Roles(['admin', 'moderator'])
   async create(@Body() createSurveyDto: CreateSurveyDto) {
     return this.surveyService.create(createSurveyDto);
   }
@@ -27,13 +27,13 @@ export class SurveyController {
   }
 
   @Put(':id')
-  @Roles(['admin', 'moderator'])
+  // @Roles(['admin', 'moderator'])
   async update(@Param('id') id: string, @Body() updateSurveyDto: UpdateSurveyDto) {
     return this.surveyService.update(id, updateSurveyDto);
   }
 
   @Delete(':id')
-  @Roles(['admin'])
+  // @Roles(['admin'])
   async remove(@Param('id') id: string) {
     return this.surveyService.remove(id);
   }
